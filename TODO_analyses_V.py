@@ -11,8 +11,8 @@ def firstpart(input):
     doc = nlp(input)
 
     # these are hard-coded. i couldn't find a way to extract the number of sentences/words
-    word_nr_insentence = np.zeros(392)
-    lengword_nr = np.zeros(13241)
+    word_nr_insentence = np.zeros(701)
+    lengword_nr = np.zeros(13242)
 
     i = 0   # Counter for sentences
     j = 0   # Counter for words
@@ -32,10 +32,7 @@ def firstpart(input):
         for token in sentence:
             # Let's filter out punctuation
             if not token.is_punct:
-                token_word = list(token.text.lower())
-                if token_word[0] == ".":
-                    token_word.remove(".")
-                token_word = nlp("".join(token_word))[0]
+                token_word = nlp(token.text.lower())[0]
 
                 words.append(token_word.text) # For counting word occurences
                 pos_.append(token_word.pos_) # For counting universal pos tags
@@ -43,9 +40,10 @@ def firstpart(input):
                 tag_.append(token_word.tag_) # finegrained pos tags
 
                 # for calculating average word and sentence length
-                lengword_nr[j] = len(token_word.text) # for average word length
+                lengword_nr[j] = len(token_word.text.lower()) # for average word length
                 j += 1  # counter, goes up for each word
                 word_nr_insentence[i] += 1 # for average sentence length
+
         # counters, updating dictionaries
         i += 1 # counter, goes up for each sentence
         word_frequencies.update(words)
@@ -97,11 +95,7 @@ def frequencies(input):
         for token in sentence:
             # Let's filter out punctuation
             if not token.is_punct:
-
-                token_word = list(token.text.lower())
-                if token_word[0] == ".":
-                    token_word.remove(".")
-                token_word = nlp("".join(token_word))[0]
+                token_word = nlp(token.text.lower())[0]
 
                 if token_word.tag_ == tencommons[0]:
                     words1.append(token_word.text) # For counting word occurences
@@ -167,10 +161,7 @@ def ngrams(input, ngram_size, type):
         for token in sentence:
             # Let's filter out punctuation
             if not token.is_punct:
-                token_word = list(token.text.lower())
-                if token_word[0] == ".":
-                    token_word.remove(".")
-                token_word = nlp("".join(token_word))[0]
+                token_word = nlp(token.text.lower())[0]
 
                 if type == "text":
                     words.append(token_word.text) # For counting word occurences
@@ -201,17 +192,14 @@ def lemmatization(input):
         for token in sentence:
             # Let's filter out punctuation
             if not token.is_punct:
-                token_word = list(token.text.lower())
-                if token_word[0] == ".":
-                    token_word.remove(".")
-                token_word = nlp("".join(token_word))[0]
+                token_word = nlp(token.text.lower())[0]
 
                 words.append(token_word.lemma_) # For counting word occurences
 
                 if str(token_word.lemma_) not in lemma_dict:
-                    lemma_dict[str(token_word.lemma_)] = [str(token_word)]
+                    lemma_dict[str(token_word.lemma_)] = [str(token_word.text)]
                 else:
-                    lemma_dict[str(token_word.lemma_)].append(str(token_word))
+                    lemma_dict[str(token_word.lemma_)].append(str(token_word.text))
 
         lemma_freq.update(words)
 
@@ -241,7 +229,8 @@ def NER(input):
                 NER_dict[str(token.label_)] = [str(token)]
             else:
                 NER_dict[str(token.label_)].append(str(token))
-        print(i)
+        if i < 6:
+            print(i)
         i += 1
         NER_freq.update(words)
 
@@ -258,17 +247,15 @@ if __name__ == '__main__':
     with open(filename, 'r', encoding='utf-8') as f:
         newline_break =""
         for readline in f:
-            line_strip = readline.rstrip()
+            line_strip = (readline.rstrip() +" ")
             newline_break+=line_strip
     input = newline_break
 
     # firstpart(input)
     # frequencies(input)
-    # ngrams(input, 2, "pos_")
+    # ngrams(input, 2, "text")
     # lemmatization(input)
-    # NER(input)
+    NER(input)
 
-    doc = nlp("children are thought to be aged three , eight , and ten years , alongside an eighteen-month-old baby . We mixed different concentrations of ROS with the spores , plated them out on petridishes with an agar-solution where fungus can grow on . They feel they are under-represented in higher education and are suffering in a regional economic downturn . Especially as it concerns a third party building up its military presence near our borders . Police said three children were hospitalised for severe dehydration. Virginia Álvarez , who wrote the report , noted , instead of listening to their demands , instead of starting a dialogue , authorities are doing everything they can to impede people from protesting . US troops and tanks in Poland in 2015 , as part of an earlier deployment under Operation Atlantic Resolve .")
-    displacy.serve(doc, style="ent")
 
 
