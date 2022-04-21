@@ -62,10 +62,13 @@ def random_baseline(train_sentences, train_labels, testinput, testlabels, B = 10
     instances = []
     correct = []
     accuracy = []
+
     for b in range(B):
         for i, instance in enumerate(testinput):
             print(instance)
             tokens = instance.split(" ")
+
+            instance_predictions = [np.random.choice(["C", "N"]) for t in tokens]
             predictions.append(instance_predictions)
 
             for j, label in enumerate(testlabels[i].split(' ')):
@@ -166,7 +169,7 @@ if __name__ == '__main__':
 
     # Note: this loads all instances into memory. If you work with bigger files in the future, use an iterator instead.
 
-    with open(train_path + "sentences.txt") as sent_file:
+    with open(train_path + "sentences.txt", encoding="utf8") as sent_file:
         train_sentences = sent_file.readlines()
 
     with open(train_path + "labels.txt") as label_file:
@@ -184,7 +187,7 @@ if __name__ == '__main__':
     with open(test_path + "labels.txt") as test_label_file:
         testlabels = test_label_file.readlines()
 
-    majority_accuracy, majority_predictions = length_baseline(train_sentences, train_labels, testinput, testlabels, treshold= 5)
-    write_output("length_baseline.tsv", majority_predictions, testlabels, testinput)
+    majority_accuracy, majority_predictions = random_baseline(train_sentences, train_labels, testinput, testlabels)
+    write_output("random_baseline.tsv", majority_predictions, testlabels, testinput)
     print(majority_accuracy)
 
