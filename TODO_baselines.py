@@ -96,25 +96,29 @@ def freq_baseline(train_sentences, train_labels, testinput, testlabels, treshold
 
     for sentence in train_sentences:
         words = []
-        for token in sentence:
+        #print(sentence)
+        for token in sentence.split(" "):
             words.append(token)
         word_frequencies.update(words)
+    print(word_frequencies)
+    print(word_frequencies["coordinator"])
 
     print(word_frequencies)
     for i, instance in enumerate(testinput):
-        print(instance)
+        #print(instance)
         tokens = instance.split(" ")
         instance_predictions = ["N" if word_frequencies[t] > treshold else "C" for t in tokens]
         predictions.append(instance_predictions)
         instances.append(instance)
-        print(instance_predictions)
-        print(testlabels[i])
+        #print(instance_predictions)
+        #print(testlabels[i])
 
         for j, label in enumerate(testlabels[i].split(" ")):
             if label == instance_predictions[j]: correct.append(1)
             else: correct.append(0)
 
     accuracy = sum(correct) / len(correct)
+    #print(accuracy)
 
     return accuracy, predictions
 
@@ -187,7 +191,15 @@ if __name__ == '__main__':
     with open(test_path + "labels.txt") as test_label_file:
         testlabels = test_label_file.readlines()
 
-    majority_accuracy, majority_predictions = random_baseline(train_sentences, train_labels, testinput, testlabels)
-    write_output("random_baseline.tsv", majority_predictions, testlabels, testinput)
+    treshold = []
+    #for i in range(10):
+    #    majority_accuracy, majority_predictions = freq_baseline(train_sentences, train_labels, testinput, testlabels,
+    #                                                            treshold=0)
+    #    treshold.append(majority_accuracy)
+    print(treshold)
+    majority_accuracy, majority_predictions = freq_baseline(train_sentences, train_labels, testinput, testlabels, treshold = 0)
+    write_output("freq_baseline.tsv", majority_predictions, testlabels, testinput)
+    print(testinput)
+    print(majority_predictions)
     print(majority_accuracy)
 
