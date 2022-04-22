@@ -65,6 +65,7 @@ class Net(nn.Module):
         # dim: batch_size x seq_len x embedding_dim
         s = self.embedding(s)
 
+
         # run the LSTM along the sentences of length seq_len
         # dim: batch_size x seq_len x lstm_hidden_dim
         s, _ = self.lstm(s)

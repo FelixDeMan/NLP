@@ -114,6 +114,9 @@ def freq_baseline(train_sentences, train_labels, testinput, testlabels, treshold
         #print(testlabels[i])
 
         for j, label in enumerate(testlabels[i].split(" ")):
+            print(instance)
+            print(instance_predictions)
+            print(testlabels[i])
             if label == instance_predictions[j]: correct.append(1)
             else: correct.append(0)
 
@@ -122,7 +125,7 @@ def freq_baseline(train_sentences, train_labels, testinput, testlabels, treshold
 
     return accuracy, predictions
 
-def length_baseline(train_sentences, train_labels, testinput, testlabels, treshold = 3):
+def length_baseline(train_sentences, train_labels, testinput, testlabels, treshold = 7):
     predictions = []
     instances = []
     correct = []
@@ -183,7 +186,7 @@ if __name__ == '__main__':
     with open(dev_path + "sentences.txt") as dev_file:
         dev_sentences = dev_file.readlines()
 
-    with open(train_path + "labels.txt") as dev_label_file:
+    with open(dev_path + "labels.txt") as dev_label_file:
         dev_labels = dev_label_file.readlines()
     with open(test_path + "sentences.txt") as testfile:
         testinput = testfile.readlines()
@@ -191,15 +194,20 @@ if __name__ == '__main__':
     with open(test_path + "labels.txt") as test_label_file:
         testlabels = test_label_file.readlines()
 
-    treshold = []
-    #for i in range(10):
-    #    majority_accuracy, majority_predictions = freq_baseline(train_sentences, train_labels, testinput, testlabels,
-    #                                                            treshold=0)
-    #    treshold.append(majority_accuracy)
-    print(treshold)
-    majority_accuracy, majority_predictions = freq_baseline(train_sentences, train_labels, testinput, testlabels, treshold = 0)
-    write_output("freq_baseline.tsv", majority_predictions, testlabels, testinput)
-    print(testinput)
-    print(majority_predictions)
-    print(majority_accuracy)
+    treshold= []
+    # for i in range(10):
+    #     majority_accuracy, majority_predictions = length_baseline(train_sentences, train_labels, testinput, testlabels,
+    #                                                             treshold=i)
+    #     treshold.append(majority_accuracy)
+    # print(treshold)
+
+    majority_accuracy, majority_predictions = majority_baseline(train_sentences, train_labels, testinput, testlabels)
+    print(dev_sentences[0])
+    print(dev_labels[0])
+    majority_acc , _ = length_baseline(train_sentences, train_labels, dev_sentences, dev_labels)
+
+    write_output("majority_baseline.tsv", majority_predictions, testlabels, testinput)
+    #print(testinput)
+    #print(majority_predictions)
+    print(majority_acc , majority_accuracy)
 

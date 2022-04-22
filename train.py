@@ -13,6 +13,7 @@ import utils
 import model.net as net
 from model.data_loader import DataLoader
 from evaluate import evaluate
+from evaluate import evaluate_and_output
 
 
 parser = argparse.ArgumentParser()
@@ -86,7 +87,7 @@ def train(model, optimizer, loss_fn, data_iterator, metrics, params, num_steps):
     logging.info("- Train metrics: " + metrics_string)
 
 
-def train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics, params, model_dir, restore_file=None):
+def train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics, params, model_dir, id2word, tags, outfile, restore_file=None):
     """Train the model and evaluate every epoch.
 
     Args:
@@ -124,8 +125,8 @@ def train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics,
         num_steps = (params.val_size + 1) // params.batch_size
         val_data_iterator = data_loader.data_iterator(
             val_data, params, shuffle=False)
-        val_metrics = evaluate(
-            model, loss_fn, val_data_iterator, metrics, num_steps)
+        val_metrics = evaluate_and_output(
+            model, loss_fn, val_data_iterator, metrics, num_steps, id2word, tags, outfile)
 
         val_acc = val_metrics['accuracy']
         is_best = val_acc >= best_val_acc
@@ -155,48 +156,53 @@ def train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics,
 
 if __name__ == '__main__':
 
-    # Load the parameters from json file
-    args = parser.parse_args()
-    json_path = os.path.join(args.model_dir, 'params.json')
-    assert os.path.isfile(
-        json_path), "No json configuration file found at {}".format(json_path)
-    params = utils.Params(json_path)
+    for i in range(5):
+        # Load the parameters from json file
+        args = parser.parse_args()
+        json_path = os.path.join(args.model_dir, 'params'+str(i)+'.json')
+        assert os.path.isfile(
+            json_path), "No json configuration file found at {}".format(json_path)
+        params = utils.Params(json_path)
 
-    # use GPU if available
-    params.cuda = torch.cuda.is_available()
+        # use GPU if available
+        params.cuda = torch.cuda.is_available()
 
-    # Set the random seed for reproducible experiments
-    torch.manual_seed(230)
-    if params.cuda:
-        torch.cuda.manual_seed(230)
+        # Set the random seed for reproducible experiments
+        torch.manual_seed(230)
+        if params.cuda:
+            torch.cuda.manual_seed(230)
 
-    # Set the logger
-    utils.set_logger(os.path.join(args.model_dir, 'train.log'))
+        # Set the logger
+        utils.set_logger(os.path.join(args.model_dir, 'train.log'))
 
-    # Create the input data pipeline
-    logging.info("Loading the datasets...")
+        # Create the input data pipeline
+        logging.info("Loading the datasets...")
 
-    # load data
-    data_loader = DataLoader(args.data_dir, params)
-    data = data_loader.load_data(['train', 'val'], args.data_dir)
-    train_data = data['train']
-    val_data = data['val']
+        # load data
+        data_loader = DataLoader(args.data_dir, params)
+        data = data_loader.load_data(['train', 'val'], args.data_dir)
+        train_data = data['train']
+        val_data = data['val']
 
-    # specify the train and val dataset sizes
-    params.train_size = train_data['size']
-    params.val_size = val_data['size']
+        # specify the train and val dataset sizes
+        params.train_size = train_data['size']
+        params.val_size = val_data['size']
 
-    logging.info("- done.")
+        logging.info("- done.")
 
-    # Define the model and optimizer
-    model = net.Net(params).cuda() if params.cuda else net.Net(params)
-    optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
+        # Define the model and optimizer
+        model = net.Net(params).cuda() if params.cuda else net.Net(params)
+        optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
-    # fetch loss function and metrics
-    loss_fn = net.loss_fn
-    metrics = net.metrics
+        # fetch loss function and metrics
+        loss_fn = net.loss_fn
+        metrics = net.metrics
 
-    # Train the model
-    logging.info("Starting training for {} epoch(s)".format(params.num_epochs))
-    train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics, params, args.model_dir,
-                       args.restore_file)
+        id2word = {v: k for k, v in data_loader.vocab.items()}
+        tags = {v: k for k, v in data_loader.tag_map.items()}
+        outfile = args.model_dir + "/model_output"+str(i)+".tsv"
+        # Train the model
+        logging.info("Starting training for {} epoch(s)".format(params.num_epochs))
+        train_and_evaluate(model, train_data, val_data, optimizer, loss_fn, metrics, params, args.model_dir,id2word, tags, outfile,
+                           args.restore_file)
+
