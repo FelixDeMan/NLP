@@ -87,23 +87,22 @@ correlation_matrix = df_single_complex[['target','prob','wordlength','wordfreq',
 print(correlation_matrix)
 
 # create scatter plot of word length vs complexity
-'''
 sns.regplot(data=df_results, x='wordlength', y='prob', color=".4")
 plt.title('Relation between word complexity and word length')
 plt.xlabel('word length')
 plt.ylabel('probabilistic complexity')
 plt.show()
-'''
+
 # create scatter plot of word frequency vs complexity
 sns.regplot(data=df_results, x='wordfreqlog', y='prob')
 plt.title('Logarithmic relation between word complexity and word frequency')
 plt.xlabel('word frequency')
 plt.ylabel('probabilistic complexity')
 plt.show()
-'''
+
 # create a boxplot of POS tag vs complexity 
-sns.boxplot(data=df_results, x='postag', y='prob')
+sns.scatterplot(data=df_results, x='postag', y='prob', color="0.1")
 plt.title('Relation between word complexity and POS tag')
 plt.xlabel('POS tag')
 plt.ylabel('probabilistic complexity')
-plt.show()'''
+plt.show()
